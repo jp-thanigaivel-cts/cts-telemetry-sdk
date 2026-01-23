@@ -1,0 +1,159 @@
+> Task :cts-otel-core:compileJava UP-TO-DATE
+> Task :cts-otel-core:processResources NO-SOURCE
+> Task :cts-otel-core:classes UP-TO-DATE
+> Task :cts-otel-core:jar UP-TO-DATE
+> Task :cts-otel-spring-boot-adapter:compileJava UP-TO-DATE
+> Task :cts-otel-spring-boot-adapter:processResources UP-TO-DATE
+> Task :cts-otel-spring-boot-adapter:classes UP-TO-DATE
+> Task :cts-otel-spring-boot-adapter:jar UP-TO-DATE
+> Task :examples:demo-app-spring-boot:compileJava UP-TO-DATE
+> Task :examples:demo-app-spring-boot:processResources UP-TO-DATE
+> Task :examples:demo-app-spring-boot:classes UP-TO-DATE
+> Task :examples:demo-app-spring-boot:resolveMainClassName UP-TO-DATE
+
+> Task :examples:demo-app-spring-boot:bootRun
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.0)
+
+2025-11-23T09:53:46.776+05:30  INFO 11675 --- [demo-order-service] [           main] com.example.demo.DemoApplication         : Starting DemoApplication using Java 17.0.12 with PID 11675 (/Users/jeyaprakashthanigaivel/JP/Workspace/Java/cts-telemetry-sdk/examples/demo-app-spring-boot/build/classes/java/main started by jeyaprakashthanigaivel in /Users/jeyaprakashthanigaivel/JP/Workspace/Java/cts-telemetry-sdk/examples/demo-app-spring-boot)
+2025-11-23T09:53:46.782+05:30  INFO 11675 --- [demo-order-service] [           main] com.example.demo.DemoApplication         : No active profile set, falling back to 1 default profile: "default"
+2025-11-23T09:53:47.554+05:30  INFO 11675 --- [demo-order-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-23T09:53:47.607+05:30  INFO 11675 --- [demo-order-service] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 1 JPA repository interface.
+2025-11-23T09:53:48.021+05:30  WARN 11675 --- [demo-order-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'com.cts.telemetry.adapter.spring.config.OptelTracingAutoConfiguration' of type [com.cts.telemetry.adapter.spring.config.OptelTracingAutoConfiguration$$SpringCGLIB$$0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [optelHttpClientInstrumentation]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2025-11-23T09:53:48.030+05:30  WARN 11675 --- [demo-order-service] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'optelInternalTracingAdvisor' of type [com.cts.telemetry.adapter.spring.tracing.OptelInternalTracingAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [optelHttpClientInstrumentation]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2025-11-23T09:53:48.255+05:30  INFO 11675 --- [demo-order-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-11-23T09:53:48.265+05:30  INFO 11675 --- [demo-order-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-11-23T09:53:48.266+05:30  INFO 11675 --- [demo-order-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.24]
+2025-11-23T09:53:48.322+05:30  INFO 11675 --- [demo-order-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-11-23T09:53:48.324+05:30  INFO 11675 --- [demo-order-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1460 ms
+2025-11-23T09:53:48.503+05:30  INFO 11675 --- [demo-order-service] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-23T09:53:48.540+05:30  INFO 11675 --- [demo-order-service] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2025-11-23T09:53:48.561+05:30  INFO 11675 --- [demo-order-service] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-23T09:53:48.764+05:30  INFO 11675 --- [demo-order-service] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-23T09:53:48.782+05:30  INFO 11675 --- [demo-order-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-23T09:53:48.930+05:30  INFO 11675 --- [demo-order-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:demo user=SA
+2025-11-23T09:53:48.934+05:30  INFO 11675 --- [demo-order-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-23T09:53:48.970+05:30  WARN 11675 --- [demo-order-service] [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-11-23T09:53:49.511+05:30  INFO 11675 --- [demo-order-service] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table orders (id bigint generated by default as identity, item varchar(255), price float(53) not null, primary key (id))
+2025-11-23T09:53:49.571+05:30  INFO 11675 --- [demo-order-service] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-23T09:53:49.792+05:30  WARN 11675 --- [demo-order-service] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-23T09:53:50.053+05:30  WARN 11675 --- [demo-order-service] [           main] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'optelInitializer' defined in class path resource [com/cts/telemetry/adapter/spring/config/OptelAutoConfiguration.class]: Failed to instantiate [com.cts.telemetry.init.OptelInitializer]: Factory method 'optelInitializer' threw exception with message: GlobalOpenTelemetry.set has already been called. GlobalOpenTelemetry.set must be called only once before any calls to GlobalOpenTelemetry.get. If you are using the OpenTelemetrySdk, use OpenTelemetrySdkBuilder.buildAndRegisterGlobal instead. Previous invocation set to cause of this exception.
+2025-11-23T09:53:50.053+05:30  INFO 11675 --- [demo-order-service] [           main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-11-23T09:53:50.055+05:30  INFO 11675 --- [demo-order-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-11-23T09:53:50.057+05:30  INFO 11675 --- [demo-order-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-11-23T09:53:50.058+05:30  INFO 11675 --- [demo-order-service] [           main] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2025-11-23T09:53:50.069+05:30  INFO 11675 --- [demo-order-service] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-11-23T09:53:50.082+05:30 ERROR 11675 --- [demo-order-service] [           main] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'optelInitializer' defined in class path resource [com/cts/telemetry/adapter/spring/config/OptelAutoConfiguration.class]: Failed to instantiate [com.cts.telemetry.init.OptelInitializer]: Factory method 'optelInitializer' threw exception with message: GlobalOpenTelemetry.set has already been called. GlobalOpenTelemetry.set must be called only once before any calls to GlobalOpenTelemetry.get. If you are using the OpenTelemetrySdk, use OpenTelemetrySdkBuilder.buildAndRegisterGlobal instead. Previous invocation set to cause of this exception.
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:648) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:636) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1337) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1167) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:962) ~[spring-context-6.1.8.jar:6.1.8]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.8.jar:6.1.8]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.3.0.jar:3.3.0]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.3.0.jar:3.3.0]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.3.0.jar:3.3.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335) ~[spring-boot-3.3.0.jar:3.3.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363) ~[spring-boot-3.3.0.jar:3.3.0]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352) ~[spring-boot-3.3.0.jar:3.3.0]
+	at com.example.demo.DemoApplication.main(DemoApplication.java:9) ~[main/:na]
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.cts.telemetry.init.OptelInitializer]: Factory method 'optelInitializer' threw exception with message: GlobalOpenTelemetry.set has already been called. GlobalOpenTelemetry.set must be called only once before any calls to GlobalOpenTelemetry.get. If you are using the OpenTelemetrySdk, use OpenTelemetrySdkBuilder.buildAndRegisterGlobal instead. Previous invocation set to cause of this exception.
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:177) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:644) ~[spring-beans-6.1.8.jar:6.1.8]
+	... 19 common frames omitted
+Caused by: java.lang.IllegalStateException: GlobalOpenTelemetry.set has already been called. GlobalOpenTelemetry.set must be called only once before any calls to GlobalOpenTelemetry.get. If you are using the OpenTelemetrySdk, use OpenTelemetrySdkBuilder.buildAndRegisterGlobal instead. Previous invocation set to cause of this exception.
+	at io.opentelemetry.api.GlobalOpenTelemetry.set(GlobalOpenTelemetry.java:107) ~[opentelemetry-api-1.37.0.jar:1.37.0]
+	at io.opentelemetry.sdk.OpenTelemetrySdkBuilder.buildAndRegisterGlobal(OpenTelemetrySdkBuilder.java:85) ~[opentelemetry-sdk-1.37.0.jar:1.37.0]
+	at com.cts.telemetry.init.OptelInitializer.initialize(OptelInitializer.java:91) ~[cts-otel-core-1.0-SNAPSHOT.jar:na]
+	at com.cts.telemetry.adapter.spring.config.OptelAutoConfiguration.optelInitializer(OptelAutoConfiguration.java:25) ~[cts-otel-spring-boot-adapter-1.0-SNAPSHOT.jar:na]
+	at com.cts.telemetry.adapter.spring.config.OptelAutoConfiguration$$SpringCGLIB$$0.CGLIB$optelInitializer$1(<generated>) ~[cts-otel-spring-boot-adapter-1.0-SNAPSHOT.jar:na]
+	at com.cts.telemetry.adapter.spring.config.OptelAutoConfiguration$$SpringCGLIB$$FastClass$$1.invoke(<generated>) ~[cts-otel-spring-boot-adapter-1.0-SNAPSHOT.jar:na]
+	at org.springframework.cglib.proxy.MethodProxy.invokeSuper(MethodProxy.java:258) ~[spring-core-6.1.8.jar:6.1.8]
+	at org.springframework.context.annotation.ConfigurationClassEnhancer$BeanMethodInterceptor.intercept(ConfigurationClassEnhancer.java:339) ~[spring-context-6.1.8.jar:6.1.8]
+	at com.cts.telemetry.adapter.spring.config.OptelAutoConfiguration$$SpringCGLIB$$0.optelInitializer(<generated>) ~[cts-otel-spring-boot-adapter-1.0-SNAPSHOT.jar:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140) ~[spring-beans-6.1.8.jar:6.1.8]
+	... 20 common frames omitted
+Caused by: java.lang.Throwable: null
+	at io.opentelemetry.api.GlobalOpenTelemetry.set(GlobalOpenTelemetry.java:115) ~[opentelemetry-api-1.37.0.jar:1.37.0]
+	at io.opentelemetry.api.GlobalOpenTelemetry.get(GlobalOpenTelemetry.java:85) ~[opentelemetry-api-1.37.0.jar:1.37.0]
+	at io.opentelemetry.api.GlobalOpenTelemetry.getTracer(GlobalOpenTelemetry.java:134) ~[opentelemetry-api-1.37.0.jar:1.37.0]
+	at com.cts.telemetry.tracing.OptelTracer.getTracer(OptelTracer.java:18) ~[cts-otel-core-1.0-SNAPSHOT.jar:na]
+	at com.cts.telemetry.adapter.spring.tracing.TracingQueryExecutionListener.beforeQuery(TracingQueryExecutionListener.java:35) ~[cts-otel-spring-boot-adapter-1.0-SNAPSHOT.jar:na]
+	at net.ttddyy.dsproxy.listener.ChainListener.beforeQuery(ChainListener.java:20) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.proxy.StatementProxyLogic.performQueryExecutionListener(StatementProxyLogic.java:308) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.proxy.StatementProxyLogic.access$700(StatementProxyLogic.java:37) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.proxy.StatementProxyLogic$1.execute(StatementProxyLogic.java:123) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.listener.MethodExecutionListenerUtils.invoke(MethodExecutionListenerUtils.java:42) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.proxy.StatementProxyLogic.invoke(StatementProxyLogic.java:120) ~[datasource-proxy-1.7.jar:na]
+	at net.ttddyy.dsproxy.proxy.jdk.PreparedStatementInvocationHandler.invoke(PreparedStatementInvocationHandler.java:37) ~[datasource-proxy-1.7.jar:na]
+	at jdk.proxy2/jdk.proxy2.$Proxy103.executeQuery(Unknown Source) ~[na:na]
+	at org.hibernate.tool.schema.extract.spi.ExtractionContext.getQueryResults(ExtractionContext.java:49) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.extract.internal.SequenceInformationExtractorLegacyImpl.extractMetadata(SequenceInformationExtractorLegacyImpl.java:39) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.initializeSequences(DatabaseInformationImpl.java:66) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.<init>(DatabaseInformationImpl.java:60) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.internal.Helper.buildDatabaseInformation(Helper.java:185) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:98) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:280) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:144) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at java.base/java.util.HashMap.forEach(HashMap.java:1421) ~[na:na]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:141) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:322) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:457) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1506) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75) ~[spring-orm-6.1.8.jar:6.1.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:390) ~[spring-orm-6.1.8.jar:6.1.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409) ~[spring-orm-6.1.8.jar:6.1.8]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396) ~[spring-orm-6.1.8.jar:6.1.8]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:366) ~[spring-orm-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1835) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1784) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:205) ~[spring-beans-6.1.8.jar:6.1.8]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:952) ~[spring-context-6.1.8.jar:6.1.8]
+	... 8 common frames omitted
+
+
+> Task :examples:demo-app-spring-boot:bootRun FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':examples:demo-app-spring-boot:bootRun'.
+> Process 'command '/Users/jeyaprakashthanigaivel/JP/Software/Extracted/jdk-17.0.12.jdk/Contents/Home/bin/java'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6s
+9 actionable tasks: 1 executed, 8 up-to-date

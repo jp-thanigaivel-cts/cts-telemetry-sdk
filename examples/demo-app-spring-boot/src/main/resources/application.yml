@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: demo-order-service
+  datasource:
+    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+grpc:
+  server:
+    port: 9091
+
+optel:
+  serviceName: demo-order-service
+  endpoint: http://localhost:4317
+  exporter: BOTH # GRPC, LOGGING, or BOTH
+  export-interval-seconds: 15
+  metrics:
+    enabled: true
+    memory:
+      enabled: true
+      pushIntervalMs: 5000
+  tracing:
+    enabled: true
+    instrument:
+      http:
+        enabled: true
+      db:
+        enabled: true
+        capture-sql: true
+        capture-params: false
+      cache:
+        enabled: true
+      internal:
+        enabled: true
+        packages: [com.example.demo.service.base, com.example.demo.repository]
+      kafka:
+        producer: false
+        consumer: false
+      jms:
+        enabled: false

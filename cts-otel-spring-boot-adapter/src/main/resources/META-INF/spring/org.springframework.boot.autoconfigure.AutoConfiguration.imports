@@ -1,0 +1,3 @@
+com.cts.telemetry.adapter.spring.config.OptelAutoConfiguration
+com.cts.telemetry.adapter.spring.config.OptelTracingAutoConfiguration
+com.cts.telemetry.adapter.spring.tracing.OptelGrpcInstrumentation
