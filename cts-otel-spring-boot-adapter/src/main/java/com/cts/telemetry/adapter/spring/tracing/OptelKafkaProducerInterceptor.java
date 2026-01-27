@@ -14,6 +14,8 @@ import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
+import org.apache.kafka.common.TopicPartition;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
@@ -24,7 +26,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object, Object> {
 
     private final KafkaProducerMetricsHandler metricsHandler;
-    private final Map<String, Queue<Long>> topicStartTimes = new ConcurrentHashMap<>();
+    private final Map<TopicPartition, Queue<Long>> partitionStartTimes = new ConcurrentHashMap<>();
+    private final Map<String, Queue<Long>> topicFallbackStartTimes = new ConcurrentHashMap<>();
 
     public OptelKafkaProducerInterceptor() {
         this(OptelInitializer.getConfig() != null ? OptelInitializer.getConfig() : new OptelConfig());
@@ -38,9 +41,14 @@ public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object
     public ProducerRecord<Object, Object> onSend(ProducerRecord<Object, Object> record) {
         log.info("onSend is started");
 
-        // Track start time for this topic
-        topicStartTimes.computeIfAbsent(record.topic(), k -> new ConcurrentLinkedQueue<>())
-                .add(System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+        Integer partition = record.partition();
+        if (partition != null) {
+            TopicPartition tp = new TopicPartition(record.topic(), partition);
+            partitionStartTimes.computeIfAbsent(tp, k -> new ConcurrentLinkedQueue<>()).add(now);
+        } else {
+            topicFallbackStartTimes.computeIfAbsent(record.topic(), k -> new ConcurrentLinkedQueue<>()).add(now);
+        }
 
         Span span = OptelTracer.startSpan("Kafka Send " + record.topic(), SpanKind.PRODUCER);
 
@@ -67,24 +75,35 @@ public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object
     public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
         if (metadata != null) {
             String topic = metadata.topic();
-            Queue<Long> startTimeQueue = topicStartTimes.get(topic);
+            int partition = metadata.partition();
+            TopicPartition tp = new TopicPartition(topic, partition);
 
-            if (startTimeQueue != null) {
-                Long startTime = startTimeQueue.poll();
-                if (startTime != null) {
-                    double duration = (System.currentTimeMillis() - startTime) / 1000.0;
-                    String errorType = (exception != null) ? exception.getClass().getSimpleName() : null;
-                    Integer partition = metadata.partition();
+            Long startTime = null;
+            Queue<Long> partitionQueue = partitionStartTimes.get(tp);
+            if (partitionQueue != null) {
+                startTime = partitionQueue.poll();
+            }
 
-                    metricsHandler.recordMetrics(topic, partition, duration, errorType, null, null);
+            if (startTime == null) {
+                Queue<Long> fallbackQueue = topicFallbackStartTimes.get(topic);
+                if (fallbackQueue != null) {
+                    startTime = fallbackQueue.poll();
                 }
+            }
+
+            if (startTime != null) {
+                double duration = (System.currentTimeMillis() - startTime) / 1000.0;
+                String errorType = (exception != null) ? exception.getClass().getSimpleName() : null;
+
+                metricsHandler.recordMetrics(topic, partition, duration, errorType, null, null);
             }
         }
     }
 
     @Override
     public void close() {
-        topicStartTimes.clear();
+        partitionStartTimes.clear();
+        topicFallbackStartTimes.clear();
     }
 
     @Override
