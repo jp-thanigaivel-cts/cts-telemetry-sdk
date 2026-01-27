@@ -3,6 +3,7 @@ package com.cts.telemetry.adapter.spring.tracing;
 import com.cts.telemetry.adapter.spring.metrics.KafkaConsumerMetricsHandler;
 import com.cts.telemetry.api.SpanAttributes;
 import com.cts.telemetry.config.OptelConfig;
+import com.cts.telemetry.init.OptelInitializer;
 import com.cts.telemetry.tracing.OptelTracer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
@@ -23,6 +24,10 @@ public class OptelKafkaRecordInterceptor implements RecordInterceptor<Object, Ob
     private final ThreadLocal<Span> spanThreadLocal = new ThreadLocal<>();
     private final ThreadLocal<Scope> scopeThreadLocal = new ThreadLocal<>();
     private final ThreadLocal<Long> processStartTimeThreadLocal = new ThreadLocal<>();
+
+    public OptelKafkaRecordInterceptor() {
+        this(OptelInitializer.getConfig() != null ? OptelInitializer.getConfig() : new OptelConfig());
+    }
 
     public OptelKafkaRecordInterceptor(OptelConfig config) {
         this.metricsHandler = new KafkaConsumerMetricsHandler(config);
