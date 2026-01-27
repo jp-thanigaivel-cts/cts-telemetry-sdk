@@ -16,12 +16,15 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
 public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object, Object> {
 
     private final KafkaProducerMetricsHandler metricsHandler;
-    private final ThreadLocal<Long> startTimeThreadLocal = new ThreadLocal<>();
+    private final Map<String, Queue<Long>> topicStartTimes = new ConcurrentHashMap<>();
 
     public OptelKafkaProducerInterceptor() {
         this(OptelInitializer.getConfig() != null ? OptelInitializer.getConfig() : new OptelConfig());
@@ -34,7 +37,11 @@ public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object
     @Override
     public ProducerRecord<Object, Object> onSend(ProducerRecord<Object, Object> record) {
         log.info("onSend is started");
-        startTimeThreadLocal.set(System.currentTimeMillis());
+
+        // Track start time for this topic
+        topicStartTimes.computeIfAbsent(record.topic(), k -> new ConcurrentLinkedQueue<>())
+                .add(System.currentTimeMillis());
+
         Span span = OptelTracer.startSpan("Kafka Send " + record.topic(), SpanKind.PRODUCER);
 
         try (Scope scope = span.makeCurrent()) {
@@ -58,20 +65,26 @@ public class OptelKafkaProducerInterceptor implements ProducerInterceptor<Object
 
     @Override
     public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
-        Long startTime = startTimeThreadLocal.get();
-        if (startTime != null) {
-            double duration = (System.currentTimeMillis() - startTime) / 1000.0;
-            String errorType = (exception != null) ? exception.getClass().getSimpleName() : null;
-            String topic = (metadata != null) ? metadata.topic() : null;
-            Integer partition = (metadata != null) ? metadata.partition() : null;
+        if (metadata != null) {
+            String topic = metadata.topic();
+            Queue<Long> startTimeQueue = topicStartTimes.get(topic);
 
-            metricsHandler.recordMetrics(topic, partition, duration, errorType, null, null);
-            startTimeThreadLocal.remove();
+            if (startTimeQueue != null) {
+                Long startTime = startTimeQueue.poll();
+                if (startTime != null) {
+                    double duration = (System.currentTimeMillis() - startTime) / 1000.0;
+                    String errorType = (exception != null) ? exception.getClass().getSimpleName() : null;
+                    Integer partition = metadata.partition();
+
+                    metricsHandler.recordMetrics(topic, partition, duration, errorType, null, null);
+                }
+            }
         }
     }
 
     @Override
     public void close() {
+        topicStartTimes.clear();
     }
 
     @Override
