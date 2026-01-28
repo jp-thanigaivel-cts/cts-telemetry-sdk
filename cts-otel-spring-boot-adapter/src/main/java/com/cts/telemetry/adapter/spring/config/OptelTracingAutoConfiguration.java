@@ -60,32 +60,39 @@ public class OptelTracingAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "org.apache.kafka.clients.producer.ProducerInterceptor")
-    public  OptelKafkaProducerInterceptor optelKafkaProducerInterceptor(OptelConfig config) {
-        return new OptelKafkaProducerInterceptor();
+    public OptelKafkaProducerInterceptor optelKafkaProducerInterceptor(OptelConfig config) {
+        return new OptelKafkaProducerInterceptor(config);
     }
-    /*@Bean
-    @ConditionalOnClass(name = "org.apache.kafka.clients.consumer.ConsumerInterceptor")
-    public OptelKafkaConsumerInterceptor optelKafkaConsumerInterceptor(OptelConfig config) {
-        return new OptelKafkaConsumerInterceptor();
-    }*/
+    /*
+     * @Bean
+     * 
+     * @ConditionalOnClass(name =
+     * "org.apache.kafka.clients.consumer.ConsumerInterceptor")
+     * public OptelKafkaConsumerInterceptor
+     * optelKafkaConsumerInterceptor(OptelConfig config) {
+     * return new OptelKafkaConsumerInterceptor();
+     * }
+     */
 
     @Bean
     @ConditionalOnClass(name = "org.apache.kafka.clients.consumer.ConsumerInterceptor")
     public OptelKafkaRecordInterceptor optelKafkaRecordInterceptor(OptelConfig config) {
-        return new OptelKafkaRecordInterceptor();
+        return new OptelKafkaRecordInterceptor(config);
     }
 
     @Bean
     @ConditionalOnClass(name = "org.apache.kafka.clients.consumer.ConsumerInterceptor")
-    public BeanPostProcessor kafkaLisentenerFactoryPostProcessor(OptelKafkaRecordInterceptor optelKafkaRecordInterceptor) {
+    public BeanPostProcessor kafkaLisentenerFactoryPostProcessor(
+            OptelKafkaRecordInterceptor optelKafkaRecordInterceptor) {
 
         return new BeanPostProcessor() {
             @Override
-            public @Nullable Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            public @Nullable Object postProcessBeforeInitialization(Object bean, String beanName)
+                    throws BeansException {
                 log.info("Initializing bean: " + beanName);
                 if (bean instanceof ConcurrentKafkaListenerContainerFactory) {
                     log.info("Configuring ConcurrentKafkaListenerContainerFactory with OptelKafkaRecordInterceptor");
-                    ConcurrentKafkaListenerContainerFactory factory = (ConcurrentKafkaListenerContainerFactory<?,?>) bean;
+                    ConcurrentKafkaListenerContainerFactory factory = (ConcurrentKafkaListenerContainerFactory<?, ?>) bean;
                     factory.setRecordInterceptor(optelKafkaRecordInterceptor);
                     log.info("OptelKafkaRecordInterceptor set on ConcurrentKafkaListenerContainerFactory");
                 }

@@ -128,6 +128,56 @@ class OptelMetricsTest {
     }
 
     @Test
+    void testRecordMessagingDuration_ShouldRecordSuccessfully() {
+        // Arrange
+        double duration = 0.45;
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("messaging.system", "kafka");
+        attributes.put("messaging.operation.type", "send");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> OptelMetrics.recordMessagingDuration(duration, attributes),
+                "Recording messaging duration should not throw exception");
+    }
+
+    @Test
+    void testRecordMessagingProcessDuration_ShouldRecordSuccessfully() {
+        // Arrange
+        double duration = 0.12;
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("messaging.system", "kafka");
+        attributes.put("messaging.operation.type", "process");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> OptelMetrics.recordMessagingProcessDuration(duration, attributes),
+                "Recording messaging process duration should not throw exception");
+    }
+
+    @Test
+    void testRecordMessageSent_ShouldRecordSuccessfully() {
+        // Arrange
+        long count = 1L;
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("messaging.system", "kafka");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> OptelMetrics.recordMessageSent(count, attributes),
+                "Recording message sent should not throw exception");
+    }
+
+    @Test
+    void testRecordMessageConsumed_ShouldRecordSuccessfully() {
+        // Arrange
+        long count = 1L;
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("messaging.system", "kafka");
+
+        // Act & Assert
+        assertDoesNotThrow(() -> OptelMetrics.recordMessageConsumed(count, attributes),
+                "Recording message consumed should not throw exception");
+    }
+
+    @Test
     void testRecordHttpDuration_WithSpecialCharactersInAttributes_ShouldRecordSuccessfully() {
         // Arrange
         double duration = 1.0;

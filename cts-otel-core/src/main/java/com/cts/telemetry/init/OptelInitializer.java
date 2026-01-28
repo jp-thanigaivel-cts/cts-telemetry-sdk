@@ -22,7 +22,11 @@ public class OptelInitializer {
         @Getter
         private static OpenTelemetrySdk openTelemetrySdk;
 
-        public static synchronized void initialize(OptelConfig config) {
+        @Getter
+        private static OptelConfig config;
+
+        public static synchronized void initialize(OptelConfig optelConfig) {
+                config = optelConfig;
                 if (!config.isEnabled()) {
                         log.debug("OpenTelemetry SDK is disabled");
                         return;
