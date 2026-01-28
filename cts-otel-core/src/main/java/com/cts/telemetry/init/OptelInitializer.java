@@ -6,8 +6,11 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.exporter.logging.LoggingMetricExporter;
 import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.Aggregation;
+import io.opentelemetry.sdk.metrics.InstrumentSelector;
 import io.opentelemetry.sdk.metrics.SdkMeterProvider;
 import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
+import io.opentelemetry.sdk.metrics.View;
 import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.ResourceAttributes;
@@ -15,6 +18,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 @Slf4j
 public class OptelInitializer {
@@ -51,6 +55,19 @@ public class OptelInitializer {
 
                 SdkMeterProviderBuilder meterProviderBuilder = SdkMeterProvider.builder()
                                 .setResource(resource);
+
+                // Configure DB duration boundaries
+                meterProviderBuilder.registerView(
+                                InstrumentSelector.builder()
+                                                .setName("db.client.operation.duration")
+                                                .build(),
+                                View.builder()
+                                                .setAggregation(
+                                                                Aggregation.explicitBucketHistogram(
+                                                                                Arrays.asList(0.001, 0.005, 0.01, 0.05,
+                                                                                                0.1, 0.5, 1.0, 5.0,
+                                                                                                10.0)))
+                                                .build());
 
                 Duration interval = Duration.ofSeconds(config.getExportIntervalSeconds());
 

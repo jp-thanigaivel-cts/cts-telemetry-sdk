@@ -1,5 +1,7 @@
 package com.cts.telemetry.adapter.spring.tracing;
 
+import com.cts.telemetry.adapter.spring.metrics.DbMetricsHandler;
+import com.cts.telemetry.api.DbAttributes;
 import com.cts.telemetry.config.OptelConfig;
 import com.cts.telemetry.tracing.OptelTracer;
 import io.opentelemetry.api.trace.Span;
@@ -19,14 +21,19 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class OptelDataSourceInstrumentation implements BeanPostProcessor {
 
     private final OptelConfig config;
+    private final DbMetricsHandler metricsHandler;
 
     public OptelDataSourceInstrumentation(OptelConfig config) {
         this.config = config;
+        this.metricsHandler = new DbMetricsHandler(config);
         // Ensure OpenTelemetry is initialized before we start creating proxies that use
         // it
         com.cts.telemetry.init.OptelInitializer.initialize(config);
@@ -42,7 +49,7 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
                 return Proxy.newProxyInstance(
                         bean.getClass().getClassLoader(),
                         new Class[] { DataSource.class },
-                        new DataSourceInvocationHandler((DataSource) bean, config));
+                        new DataSourceInvocationHandler((DataSource) bean, config, metricsHandler));
             }
         }
         return bean;
@@ -51,10 +58,12 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
     private static class DataSourceInvocationHandler implements InvocationHandler {
         private final DataSource target;
         private final OptelConfig config;
+        private final DbMetricsHandler metricsHandler;
 
-        public DataSourceInvocationHandler(DataSource target, OptelConfig config) {
+        public DataSourceInvocationHandler(DataSource target, OptelConfig config, DbMetricsHandler metricsHandler) {
             this.target = target;
             this.config = config;
+            this.metricsHandler = metricsHandler;
         }
 
         @Override
@@ -70,7 +79,7 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
                 return Proxy.newProxyInstance(
                         Connection.class.getClassLoader(),
                         new Class[] { Connection.class },
-                        new ConnectionInvocationHandler((Connection) result, config));
+                        new ConnectionInvocationHandler((Connection) result, config, metricsHandler));
             }
             return result;
         }
@@ -79,10 +88,12 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
     private static class ConnectionInvocationHandler implements InvocationHandler {
         private final Connection target;
         private final OptelConfig config;
+        private final DbMetricsHandler metricsHandler;
 
-        public ConnectionInvocationHandler(Connection target, OptelConfig config) {
+        public ConnectionInvocationHandler(Connection target, OptelConfig config, DbMetricsHandler metricsHandler) {
             this.target = target;
             this.config = config;
+            this.metricsHandler = metricsHandler;
         }
 
         @Override
@@ -116,7 +127,7 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
             return Proxy.newProxyInstance(
                     statement.getClass().getClassLoader(),
                     new Class[] { interfaceType },
-                    new StatementInvocationHandler(statement, sql, config));
+                    new StatementInvocationHandler(statement, sql, config, metricsHandler));
         }
     }
 
@@ -124,11 +135,14 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
         private final Object target;
         private final String preparedSql;
         private final OptelConfig config;
+        private final DbMetricsHandler metricsHandler;
 
-        public StatementInvocationHandler(Object target, String preparedSql, OptelConfig config) {
+        public StatementInvocationHandler(Object target, String preparedSql, OptelConfig config,
+                DbMetricsHandler metricsHandler) {
             this.target = target;
             this.preparedSql = preparedSql;
             this.config = config;
+            this.metricsHandler = metricsHandler;
         }
 
         @Override
@@ -143,28 +157,37 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
                 }
 
                 String spanName = "DB " + methodName;
+                long startTime = System.nanoTime();
                 Span span = OptelTracer.startSpan(spanName, SpanKind.CLIENT);
 
-                try (Scope scope = span.makeCurrent()) {
-                    span.setAttribute(com.cts.telemetry.api.SpanAttributes.DB_SYSTEM_NAME.key(), "sql");
-                    span.setAttribute(com.cts.telemetry.api.SpanAttributes.DB_OPERATION_NAME.key(), methodName);
-                    if (config.getTracing().getInstrument().getDb().isCaptureSql() && sql != null) {
-                        span.setAttribute(com.cts.telemetry.api.SpanAttributes.DB_QUERY_TEXT.key(), sql);
-                    }
+                Map<String, String> attributes = new HashMap<>();
+                attributes.put(DbAttributes.SYSTEM_NAME.key(), "sql");
+                attributes.put(DbAttributes.OPERATION_NAME.key(), methodName);
 
+                if (config.getTracing().getInstrument().getDb().isCaptureSql() && sql != null) {
+                    attributes.put(DbAttributes.QUERY_TEXT.key(), sql);
+                }
+
+                try (Scope scope = span.makeCurrent()) {
+                    attributes.forEach(span::setAttribute);
                     Object result = method.invoke(target, args);
                     return result;
                 } catch (InvocationTargetException e) {
                     Throwable cause = e.getTargetException();
                     span.recordException(cause);
                     span.setStatus(StatusCode.ERROR, cause.getMessage());
+                    attributes.put(DbAttributes.ERROR_TYPE.key(), cause.getClass().getName());
                     throw cause;
                 } catch (Throwable t) {
                     span.recordException(t);
                     span.setStatus(StatusCode.ERROR, t.getMessage());
+                    attributes.put(DbAttributes.ERROR_TYPE.key(), t.getClass().getName());
                     throw t;
                 } finally {
-                    span.end();
+                    long endTime = System.nanoTime();
+                    span.end(endTime, TimeUnit.NANOSECONDS);
+                    double durationSeconds = (endTime - startTime) / 1_000_000_000.0;
+                    metricsHandler.recordMetrics(attributes, durationSeconds);
                 }
             } else {
                 try {

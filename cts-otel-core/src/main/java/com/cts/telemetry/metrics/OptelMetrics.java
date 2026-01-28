@@ -19,10 +19,12 @@ public class OptelMetrics {
     private static final String MESSAGING_SENT_METRIC = "messaging.client.sent.messages";
     private static final String MESSAGING_CONSUMED_METRIC = "messaging.client.consumed.messages";
     private static final String MESSAGING_PROCESS_DURATION_METRIC = "messaging.process.duration";
+    private static final String DB_DURATION_METRIC = "db.client.operation.duration";
 
     private static DoubleHistogram httpDurationHistogram;
     private static DoubleHistogram messagingDurationHistogram;
     private static DoubleHistogram messagingProcessDurationHistogram;
+    private static DoubleHistogram dbDurationHistogram;
     private static LongCounter messagingSentCounter;
     private static LongCounter messagingConsumedCounter;
 
@@ -85,6 +87,17 @@ public class OptelMetrics {
         return messagingConsumedCounter;
     }
 
+    private static synchronized DoubleHistogram getDbDurationHistogram() {
+        if (dbDurationHistogram == null) {
+            dbDurationHistogram = getMeter()
+                    .histogramBuilder(DB_DURATION_METRIC)
+                    .setDescription("Duration of database client operations")
+                    .setUnit("s")
+                    .build();
+        }
+        return dbDurationHistogram;
+    }
+
     public static void recordHttpDuration(double duration, Map<String, String> attributes) {
         getHttpDurationHistogram().record(duration, buildAttributes(attributes));
     }
@@ -103,6 +116,10 @@ public class OptelMetrics {
 
     public static void recordMessageConsumed(long count, Map<String, String> attributes) {
         getMessagingConsumedCounter().add(count, buildAttributes(attributes));
+    }
+
+    public static void recordDbOperationDuration(double durationInSeconds, Map<String, String> attributes) {
+        getDbDurationHistogram().record(durationInSeconds, buildAttributes(attributes));
     }
 
     private static Attributes buildAttributes(Map<String, String> attributes) {
