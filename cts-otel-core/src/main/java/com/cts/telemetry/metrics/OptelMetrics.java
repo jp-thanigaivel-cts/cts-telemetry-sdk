@@ -6,6 +6,7 @@ import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
+import com.cts.telemetry.api.DbAttributes;
 
 import java.util.Map;
 
@@ -20,11 +21,13 @@ public class OptelMetrics {
     private static final String MESSAGING_CONSUMED_METRIC = "messaging.client.consumed.messages";
     private static final String MESSAGING_PROCESS_DURATION_METRIC = "messaging.process.duration";
     private static final String DB_DURATION_METRIC = "db.client.operation.duration";
+    private static final String DB_CONNECTION_COUNT_METRIC = "db.client.connection.count";
 
     private static DoubleHistogram httpDurationHistogram;
     private static DoubleHistogram messagingDurationHistogram;
     private static DoubleHistogram messagingProcessDurationHistogram;
     private static DoubleHistogram dbDurationHistogram;
+    private static io.opentelemetry.api.metrics.LongUpDownCounter dbConnectionCounter;
     private static LongCounter messagingSentCounter;
     private static LongCounter messagingConsumedCounter;
 
@@ -120,6 +123,49 @@ public class OptelMetrics {
 
     public static void recordDbOperationDuration(double durationInSeconds, Map<String, String> attributes) {
         getDbDurationHistogram().record(durationInSeconds, buildAttributes(attributes));
+    }
+
+    private static synchronized io.opentelemetry.api.metrics.LongUpDownCounter getDbConnectionCounter() {
+        if (dbConnectionCounter == null) {
+            dbConnectionCounter = getMeter()
+                    .upDownCounterBuilder(DB_CONNECTION_COUNT_METRIC)
+                    .setDescription(
+                            "Number of connections currently in the state described by the db.client.connection.state attribute")
+                    .setUnit("{connection}")
+                    .build();
+        }
+        return dbConnectionCounter;
+    }
+
+    public static void recordDbConnectionCount(long delta, Map<String, String> attributes) {
+        getDbConnectionCounter().add(delta, buildAttributes(attributes));
+    }
+
+    public static void incrementIdle(String poolName, Map<String, String> attributes) {
+        recordDbConnectionCount(1, poolName, "idle", attributes);
+    }
+
+    public static void decrementIdle(String poolName, Map<String, String> attributes) {
+        recordDbConnectionCount(-1, poolName, "idle", attributes);
+    }
+
+    public static void incrementUsed(String poolName, Map<String, String> attributes) {
+        recordDbConnectionCount(1, poolName, "used", attributes);
+    }
+
+    public static void decrementUsed(String poolName, Map<String, String> attributes) {
+        recordDbConnectionCount(-1, poolName, "used", attributes);
+    }
+
+    private static void recordDbConnectionCount(long delta, String poolName, String state,
+            Map<String, String> attributes) {
+        AttributesBuilder builder = Attributes.builder();
+        if (attributes != null) {
+            attributes.forEach(builder::put);
+        }
+        builder.put(DbAttributes.CONNECTION_POOL_NAME.key(), poolName);
+        builder.put(DbAttributes.CONNECTION_STATE.key(), state);
+        getDbConnectionCounter().add(delta, builder.build());
     }
 
     private static Attributes buildAttributes(Map<String, String> attributes) {

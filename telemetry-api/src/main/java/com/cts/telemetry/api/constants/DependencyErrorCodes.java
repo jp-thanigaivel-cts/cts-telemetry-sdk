@@ -39,10 +39,15 @@ public final class DependencyErrorCodes {
      */
     public static final String MISSING_CACHE_DEPENDENCY = "OPTEL-DEP-004";
 
-    /**
-     * Error code for missing HTTP client dependency.
-     * Thrown when HTTP instrumentation is enabled but required HTTP client classes
-     * are not on the classpath.
-     */
     public static final String MISSING_HTTP_DEPENDENCY = "OPTEL-DEP-005";
+
+    /**
+     * Error code for missing JMS dependency.
+     */
+    public static final String MISSING_JMS_DEPENDENCY = "OPTEL-DEP-006";
+
+    /**
+     * Error code for missing AspectJ dependency.
+     */
+    public static final String MISSING_ASPECTJ_DEPENDENCY = "OPTEL-DEP-007";
 }

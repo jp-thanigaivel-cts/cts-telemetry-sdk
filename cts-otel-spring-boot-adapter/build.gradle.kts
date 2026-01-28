@@ -20,6 +20,7 @@ dependencies {
     compileOnly("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
     compileOnly("io.grpc:grpc-api:1.63.0")
     compileOnly("io.grpc:grpc-stub:1.63.0")
+    compileOnly("com.zaxxer:HikariCP:5.1.0")
     
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")

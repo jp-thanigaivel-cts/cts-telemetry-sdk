@@ -43,6 +43,11 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource) {
+            // Check for HikariCP and configure metrics tracker if enabled
+            if (config.getMetrics().isEnabled()) {
+                configureHikariMetrics(bean);
+            }
+
             if (config.getTracing().isEnabled() &&
                     config.getTracing().getInstrument().getDb() != null &&
                     config.getTracing().getInstrument().getDb().isEnabled()) {
@@ -53,6 +58,34 @@ public class OptelDataSourceInstrumentation implements BeanPostProcessor {
             }
         }
         return bean;
+    }
+
+    private void configureHikariMetrics(Object bean) {
+        try {
+            // Use reflection to check if it's a HikariDataSource to avoid direct class
+            // references
+            // that might fail during class loading if Hikari is not present
+            Class<?> hikariDSClass = Class.forName("com.zaxxer.hikari.HikariDataSource");
+            if (hikariDSClass.isInstance(bean)) {
+                log.debug("HikariDataSource detected, configuring metrics tracker factory");
+
+                // Get the factory class
+                Class<?> factoryClass = Class
+                        .forName("com.cts.telemetry.adapter.spring.metrics.hikari.OptelHikariMetricsTrackerFactory");
+                Object factory = factoryClass.getConstructor(OptelConfig.class).newInstance(config);
+
+                Method setMetricsTrackerFactoryMethod = hikariDSClass.getMethod("setMetricsTrackerFactory",
+                        Class.forName("com.zaxxer.hikari.metrics.MetricsTrackerFactory"));
+
+                setMetricsTrackerFactoryMethod.invoke(bean, factory);
+            }
+        } catch (ClassNotFoundException e) {
+            // HikariCP or our factory not on classpath, ignore
+            log.trace("HikariCP classes not found, skipping Hikari metrics configuration");
+        } catch (Throwable t) {
+            log.warn("Failed to configure Hikari metrics tracker via reflection (continuing without pool metrics): {}",
+                    t.getMessage());
+        }
     }
 
     private static class DataSourceInvocationHandler implements InvocationHandler {
