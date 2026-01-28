@@ -20,7 +20,9 @@ public enum DbAttributes implements TelemetryAttribute {
     SERVER_PORT("server.port"),
     NETWORK_PEER_ADDRESS("network.peer.address"),
     NETWORK_PEER_PORT("network.peer.port"),
-    ERROR_TYPE("error.type");
+    ERROR_TYPE("error.type"),
+    CONNECTION_POOL_NAME("db.client.connection.pool.name"),
+    CONNECTION_STATE("db.client.connection.state");
 
     private final String key;
 

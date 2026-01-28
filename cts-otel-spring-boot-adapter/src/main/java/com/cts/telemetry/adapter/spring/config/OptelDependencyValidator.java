@@ -28,6 +28,8 @@ public class OptelDependencyValidator implements InitializingBean {
         validateHttpDependency();
         validateKafkaDependency();
         validateCacheDependency();
+        validateJmsDependency();
+        validateInternalDependency();
     }
 
     private void validateDbDependency() {
@@ -51,12 +53,18 @@ public class OptelDependencyValidator implements InitializingBean {
     }
 
     private void validateKafkaDependency() {
-        if (config.getTracing().getInstrument().getKafka().isProducer()
-                || config.getTracing().getInstrument().getKafka().isConsumer()) {
+        if (config.getTracing().getInstrument().getKafka().isProducer()) {
             if (!ClassUtils.isPresent("org.apache.kafka.clients.producer.ProducerInterceptor", null)) {
                 throw new OptelDependencyException(
                         DependencyErrorCodes.MISSING_KAFKA_DEPENDENCY,
                         DependencyErrorMessages.MISSING_KAFKA_DEPENDENCY);
+            }
+        }
+        if (config.getTracing().getInstrument().getKafka().isConsumer()) {
+            if (!ClassUtils.isPresent("org.apache.kafka.clients.consumer.ConsumerInterceptor", null)) {
+                throw new OptelDependencyException(
+                        DependencyErrorCodes.MISSING_KAFKA_DEPENDENCY,
+                        "Optel Kafka Consumer instrumentation is enabled but 'org.apache.kafka.clients.consumer.ConsumerInterceptor' is missing from the classpath.");
             }
         }
     }
@@ -73,13 +81,32 @@ public class OptelDependencyValidator implements InitializingBean {
 
     private void validateHttpDependency() {
         if (config.getTracing().getInstrument().getHttp().isEnabled()) {
-            // HTTP instrumentation covers Server, RestTemplate, and WebClient.
-            // Since 'http.enabled' is a broad flag, we cannot enforce the presence of a
-            // specific client
-            // without potentially breaking applications that only use Server tracing or a
-            // different client.
-            // Therefore, we skip strict dependency validation for HTTP for now,
-            // relying on @ConditionalOnClass in the auto-configuration.
+            // For HTTP server tracing
+            if (!ClassUtils.isPresent("jakarta.servlet.http.HttpServletRequest", null)) {
+                throw new OptelDependencyException(
+                        DependencyErrorCodes.MISSING_HTTP_DEPENDENCY,
+                        "Optel HTTP instrumentation is enabled but 'jakarta.servlet.http.HttpServletRequest' is missing from the classpath.");
+            }
+        }
+    }
+
+    private void validateJmsDependency() {
+        if (config.getTracing().getInstrument().getJms().isEnabled()) {
+            if (!ClassUtils.isPresent("jakarta.jms.Message", null)) {
+                throw new OptelDependencyException(
+                        DependencyErrorCodes.MISSING_JMS_DEPENDENCY,
+                        DependencyErrorMessages.MISSING_JMS_DEPENDENCY);
+            }
+        }
+    }
+
+    private void validateInternalDependency() {
+        if (config.getTracing().getInstrument().getInternal().isEnabled()) {
+            if (!ClassUtils.isPresent("org.aspectj.lang.annotation.Aspect", null)) {
+                throw new OptelDependencyException(
+                        DependencyErrorCodes.MISSING_ASPECTJ_DEPENDENCY,
+                        DependencyErrorMessages.MISSING_ASPECTJ_DEPENDENCY);
+            }
         }
     }
 }
