@@ -1,7 +1,10 @@
 package com.cts.telemetry.adapter.spring.config;
 
+import com.cts.telemetry.adapter.spring.api.strategy.HttpServerStrategy;
+import com.cts.telemetry.adapter.spring.api.strategy.KafkaConsumerStrategy;
 import com.cts.telemetry.adapter.spring.tracing.*;
 import com.cts.telemetry.config.OptelConfig;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.BeansException;
@@ -20,8 +23,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class OptelTracingAutoConfiguration {
 
     @Bean
-    public OptelServerTracingInterceptor optelServerTracingInterceptor(OptelConfig config) {
-        return new OptelServerTracingInterceptor(config);
+    public OptelServerTracingInterceptor optelServerTracingInterceptor(OptelConfig config,
+            Optional<HttpServerStrategy> strategy) {
+        OptelServerTracingInterceptor interceptor = new OptelServerTracingInterceptor(config);
+        strategy.ifPresent(interceptor::setStrategy);
+        return interceptor;
     }
 
     @Bean
@@ -76,8 +82,11 @@ public class OptelTracingAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(name = "org.apache.kafka.clients.consumer.ConsumerInterceptor")
-    public OptelKafkaRecordInterceptor optelKafkaRecordInterceptor(OptelConfig config) {
-        return new OptelKafkaRecordInterceptor(config);
+    public OptelKafkaRecordInterceptor optelKafkaRecordInterceptor(OptelConfig config,
+            Optional<KafkaConsumerStrategy> strategy) {
+        OptelKafkaRecordInterceptor interceptor = new OptelKafkaRecordInterceptor(config);
+        strategy.ifPresent(interceptor::setStrategy);
+        return interceptor;
     }
 
     @Bean

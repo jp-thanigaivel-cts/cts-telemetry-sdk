@@ -2,6 +2,8 @@ package com.cts.telemetry.adapter.spring.tracing;
 
 import com.cts.telemetry.api.AppAttributes;
 import com.cts.telemetry.api.HttpAttributes;
+import com.cts.telemetry.api.strategy.StatusType;
+import com.cts.telemetry.api.strategy.TelemetryResult;
 import com.cts.telemetry.config.OptelConfig;
 import com.cts.telemetry.tracing.OptelTracer;
 import io.opentelemetry.api.trace.Span;
@@ -67,7 +69,7 @@ public class HttpTracingHandler {
      * @return error type if an error occurred, null otherwise
      */
     public String completeSpan(SpanContext spanContext, HttpServletRequest request,
-            HttpServletResponse response, Object handler, Exception ex) {
+            HttpServletResponse response, Object handler, Exception ex, TelemetryResult result) {
         if (spanContext == null) {
             return null;
         }
@@ -94,9 +96,23 @@ public class HttpTracingHandler {
                 span.recordException(ex);
                 span.setStatus(StatusCode.ERROR, ex.getMessage());
                 errorType = ex.getClass().getName();
+            } else if (result != null && result.getStatusType() == StatusType.ERROR) {
+                span.setStatus(StatusCode.ERROR, result.getStatusDescription() != null
+                        ? result.getStatusDescription()
+                        : "Logical error signaled by application");
+                errorType = result.getStatusCode() != null ? result.getStatusCode() : "AppError";
             } else if (response.getStatus() >= 500) {
                 span.setStatus(StatusCode.ERROR, "Internal Server Error");
                 errorType = "500";
+            }
+
+            if (result != null) {
+                if (result.getAttributes() != null) {
+                    result.getAttributes().forEach(span::setAttribute);
+                }
+                if (result.getStatusCode() != null) {
+                    span.setAttribute("app.status_code", result.getStatusCode());
+                }
             }
 
         } finally {

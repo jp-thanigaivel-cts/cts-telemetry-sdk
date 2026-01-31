@@ -1,14 +1,19 @@
 package com.cts.telemetry.adapter.spring.tracing;
 
 import com.cts.telemetry.adapter.spring.metrics.KafkaConsumerMetricsHandler;
+import com.cts.telemetry.adapter.spring.api.strategy.KafkaConsumerStrategy;
 import com.cts.telemetry.api.SpanAttributes;
+import com.cts.telemetry.api.strategy.StatusType;
+import com.cts.telemetry.api.strategy.TelemetryResult;
 import com.cts.telemetry.config.OptelConfig;
 import com.cts.telemetry.init.OptelInitializer;
 import com.cts.telemetry.tracing.OptelTracer;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -24,6 +29,9 @@ public class OptelKafkaRecordInterceptor implements RecordInterceptor<Object, Ob
     private final ThreadLocal<Span> spanThreadLocal = new ThreadLocal<>();
     private final ThreadLocal<Scope> scopeThreadLocal = new ThreadLocal<>();
     private final ThreadLocal<Long> processStartTimeThreadLocal = new ThreadLocal<>();
+
+    @Setter
+    private KafkaConsumerStrategy strategy;
 
     public OptelKafkaRecordInterceptor() {
         this(OptelInitializer.getConfig() != null ? OptelInitializer.getConfig() : new OptelConfig());
@@ -72,7 +80,32 @@ public class OptelKafkaRecordInterceptor implements RecordInterceptor<Object, Ob
 
     @Override
     public void success(ConsumerRecord<Object, Object> record, Consumer<Object, Object> consumer) {
-        recordProcessMetrics(record, consumer, null);
+        String errorType = null;
+        if (strategy != null) {
+            TelemetryResult result = strategy.process(record);
+            if (result != null) {
+                Span span = spanThreadLocal.get();
+                if (span != null) {
+                    // Add custom attributes
+                    if (result.getAttributes() != null) {
+                        result.getAttributes().forEach(span::setAttribute);
+                    }
+
+                    // Handle status
+                    if (result.getStatusType() == StatusType.ERROR) {
+                        span.setStatus(StatusCode.ERROR, result.getStatusDescription() != null
+                                ? result.getStatusDescription()
+                                : "Logical error signaled by application");
+                        errorType = result.getStatusCode() != null ? result.getStatusCode() : "AppError";
+                    }
+
+                    if (result.getStatusCode() != null) {
+                        span.setAttribute("app.status_code", result.getStatusCode());
+                    }
+                }
+            }
+        }
+        recordProcessMetrics(record, consumer, errorType);
         cleanup();
     }
 

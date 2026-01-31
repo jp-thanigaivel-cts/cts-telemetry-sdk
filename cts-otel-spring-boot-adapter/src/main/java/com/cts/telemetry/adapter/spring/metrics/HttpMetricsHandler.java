@@ -27,13 +27,13 @@ public class HttpMetricsHandler {
     /**
      * Records HTTP metrics for the completed request.
      * 
-     * @param duration the request duration in milliseconds
-     * @param route           the matched route pattern (may be null)
-     * @param errorType       the error type if an error occurred (may be null)
+     * @param duration  the request duration in milliseconds
+     * @param route     the matched route pattern (may be null)
+     * @param errorType the error type if an error occurred (may be null)
      */
     public void recordMetrics(HttpServletRequest request, HttpServletResponse response,
             Object handler, Exception ex, double duration,
-            String route, String errorType) {
+            String route, String errorType, Map<String, String> additionalAttributes) {
 
         if (config.getMetrics() == null || !config.getMetrics().isEnabled()) {
             return;
@@ -89,6 +89,10 @@ public class HttpMetricsHandler {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             attributes.put(AppAttributes.API_NAME.key(),
                     handlerMethod.getBeanType().getSimpleName() + "." + handlerMethod.getMethod().getName());
+        }
+
+        if (additionalAttributes != null) {
+            attributes.putAll(additionalAttributes);
         }
 
         attributes.put(AppAttributes.SERVICE_NAME.key(), config.getServiceName());

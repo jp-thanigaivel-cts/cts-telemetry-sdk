@@ -1,9 +1,12 @@
 package com.cts.telemetry.adapter.spring.tracing;
 
+import com.cts.telemetry.adapter.spring.api.strategy.HttpServerStrategy;
+import com.cts.telemetry.api.strategy.TelemetryResult;
 import com.cts.telemetry.adapter.spring.metrics.HttpMetricsHandler;
 import com.cts.telemetry.config.OptelConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -29,6 +32,9 @@ public class OptelServerTracingInterceptor implements HandlerInterceptor {
 
     private static final String SPAN_CONTEXT_ATTR = "optelSpanContext";
     private static final String START_TIME_ATTR = "optelStartTime";
+
+    @Setter
+    private HttpServerStrategy strategy;
 
     public OptelServerTracingInterceptor(OptelConfig config) {
         this.tracingHandler = new HttpTracingHandler(config);
@@ -65,12 +71,19 @@ public class OptelServerTracingInterceptor implements HandlerInterceptor {
 
         String route = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 
+        // Process application-level strategy
+        TelemetryResult result = null;
+        if (strategy != null) {
+            result = strategy.process(request, response);
+        }
+
         // Complete span and get error type
         HttpTracingHandler.SpanContext spanContext = (HttpTracingHandler.SpanContext) request
                 .getAttribute(SPAN_CONTEXT_ATTR);
-        String errorType = tracingHandler.completeSpan(spanContext, request, response, handler, ex);
+        String errorType = tracingHandler.completeSpan(spanContext, request, response, handler, ex, result);
 
         // Record metrics
-        metricsHandler.recordMetrics(request, response, handler, ex, duration, route, errorType);
+        metricsHandler.recordMetrics(request, response, handler, ex, duration, route, errorType,
+                result != null ? result.getAttributes() : null);
     }
 }
